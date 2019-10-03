@@ -1,6 +1,4 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -59,42 +57,113 @@ public class JackTokenizer {
         reservedWords.add("this");
     }
 
-    // Input file converted to queue
-    private static List<Character> readQueue = new ArrayList<>();
+    // Input file converted to queue of lines
+    private static List<String> inputFileQueue = new ArrayList<>();
+
+    // Current reading buffer
+    private static List<Character> readBuffer = new ArrayList<>();
 
     // Output file ready for writing
-    private static List<Character> writeQueue = new ArrayList<>();
+    private static List<Character> writeBuffer = new ArrayList<>();
 
     /**
      * Main function call
      */
     public static void main(String[] args) {
-        writeQueue.add('h');
-        writeQueue.add('e');
-        writeQueue.add('l');
-        writeQueue.add('l');
-        writeQueue.add('o');
+        // Read file
+        try {
+            readFile("Main.jack");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-        writeQueue.add(' ');
-        writeQueue.add('w');
-        writeQueue.add('o');
-        writeQueue.add('r');
-        writeQueue.add('l');
-        writeQueue.add('d');
 
+        // TODO: Analyze
+
+
+
+        // Write Output
+        // Write root tag
+        writeBuffer.add('<');
+        // Tag itself
+        for(Character letter : "tokens".toCharArray())
+            writeBuffer.add(letter);
+        // Close tag
+        writeBuffer.add('>');
+        writeBuffer.add('\n');
+
+
+        // TODO: Write analyzed
+        writeTag("constant", "Hello");
+
+
+        writeBuffer.add('<');
+        writeBuffer.add('/');
+        for(Character letter : "tokens".toCharArray())
+            writeBuffer.add(letter);
+        writeBuffer.add('>');
+        writeBuffer.add('\n');
 
         try {
-            writeFile("Test.txt");
+            writeFile("Test.xml");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Writes the given tag and value
+     * @param tagName Name for xml tag
+     * @param value Value to print
+     */
+    private static void writeTag(String tagName, String value) {
+        // Open tag
+        writeBuffer.add(' ');
+        writeBuffer.add('<');
+        // Tag itself
+        for(Character letter : tagName.toCharArray())
+            writeBuffer.add(letter);
+        // Close tag
+        writeBuffer.add('>');
+
+        // Write the value
+        writeBuffer.add(' ');
+        for(Character letter : value.toCharArray())
+            writeBuffer.add(letter);
+        writeBuffer.add(' ');
+
+        // Close tag
+        writeBuffer.add('<');
+        writeBuffer.add('/');
+        for(Character letter : tagName.toCharArray())
+            writeBuffer.add(letter);
+        writeBuffer.add('>');
+        writeBuffer.add('\n');
+    }
+
+    /**
+     * Dumps the current buffer to a file
+     * @param fileName File to save
+     * @throws IOException Might fail writing
+     */
     private static void writeFile(String fileName) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-        for(Character character : writeQueue) {
+        writer.write("<?xml version = \"1.0\" encoding = \"UTF-8\" standalone = \"no\" ?>\n");
+        for(Character character : writeBuffer) {
             writer.write(character);
         }
         writer.close();
+    }
+
+    /**
+     * Read the file into a queue of lines
+     * @param fileName The input file
+     * @throws FileNotFoundException Can't find file
+     */
+    private static void readFile(String fileName) throws FileNotFoundException {
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        reader.lines().forEach(readLine -> {
+            inputFileQueue.add(readLine);
+        });
     }
 }
