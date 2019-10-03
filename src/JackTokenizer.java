@@ -1,8 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * @author Paul Davis
@@ -72,7 +69,7 @@ public class JackTokenizer {
     public static void main(String[] args) {
         // Read file
         try {
-            readFile("Main.jack");
+            readFile(args[0]);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -105,7 +102,7 @@ public class JackTokenizer {
         writeBuffer.add('\n');
 
         try {
-            writeFile("Test.xml");
+            writeFile(args[0].substring(0, args[0].length() - 5) + "T.xml");
         } catch (IOException e) {
             e.printStackTrace();
         }
