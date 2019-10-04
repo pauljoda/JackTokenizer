@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.*;
 
 /**
+ * Reads a jack file input and will output an xml of tokens
  * @author Paul Davis
  * @since 9/30/19
  */
@@ -61,9 +62,6 @@ public class JackTokenizer {
     // Input file converted to queue of lines
     private static List<String> inputFileQueue = new ArrayList<>();
 
-    // Current reading buffer
-    private static List<Character> readBuffer = new ArrayList<>();
-
     // Output file ready for writing
     private static List<Character> writeBuffer = new ArrayList<>();
 
@@ -88,9 +86,11 @@ public class JackTokenizer {
         writeBuffer.add('>');
         writeBuffer.add('\n');
 
+        // Analyze input
         for(String currentLine : inputFileQueue)
             analyzeLine(currentLine);
 
+        // Write closing tag
         writeBuffer.add('<');
         writeBuffer.add('/');
         for(Character letter : "tokens".toCharArray())
@@ -98,6 +98,7 @@ public class JackTokenizer {
         writeBuffer.add('>');
         writeBuffer.add('\n');
 
+        // Write file output, use same name as input plus T.xml
         try {
             writeFile(args[0].substring(0, args[0].length() - 5) + "T.xml");
         } catch (IOException e) {
@@ -105,7 +106,12 @@ public class JackTokenizer {
         }
     }
 
+    /**
+     * Analyzes a line and adds to the write buffer
+     * @param line Line to check
+     */
     private static void analyzeLine(String line) {
+        // Values to track progress on token
         String currentToken = "", tokenType = "";
         boolean writeToken = false, checkNext = false;
 
@@ -170,10 +176,12 @@ public class JackTokenizer {
                     case '7':
                     case '8':
                     case '9':
+                        // Digits, start integer constant
                         tokenType = "integerConstant";
                         currentToken += lexeme;
                         continue;
                     case '"' :
+                        // Start of string constant
                         tokenType = "stringConstant";
                         continue;
                     case '\t' :
@@ -185,14 +193,17 @@ public class JackTokenizer {
                         currentToken += lexeme;
                         continue;
                     default:
+                        // First check for symbol
                         if(symbols.contains(lexeme)) {
                             tokenType = "symbol";
                             currentToken += lexeme;
                             writeToken = true;
                             break;
                         }
+
+                        // Don't know but go ahead and start. It is either id or reserved word
                         currentToken += lexeme;
-                        tokenType = "UNKNOWN"; // We don't know yet
+                        tokenType = "UNKNOWN"; // We don't know yet, if you see this in output you have issue
                 }
             } else {
                 switch (lexeme) {
@@ -206,14 +217,18 @@ public class JackTokenizer {
                     case '7':
                     case '8':
                     case '9':
+                        // Still doing integer, no need to worry about much just at lexeme
                         currentToken += lexeme;
                         continue;
                     case '"' :
+                        // We are the end of the string constant, tell ready to write
                         writeToken = true;
                         break;
                     case '\t' :
                     case ' ' :
-                        // If working on string constant
+                        // Tab or space indicate we need to find out what we have
+
+                        // If working on string constant, it is ok to have spaces
                         if(tokenType.equals("stringConstant")) {
                             currentToken += lexeme;
                             continue;
@@ -228,6 +243,9 @@ public class JackTokenizer {
                         writeToken = true;
                         break;
                     default:
+                        // All other lexemes
+
+                        // Still working on string constant, just add and continue
                         if(tokenType.equals("stringConstant")) {
                             currentToken += lexeme;
                             continue;
@@ -257,6 +275,7 @@ public class JackTokenizer {
                 }
             }
 
+            // Logic to end token check has been set, dump values and reset
             if(writeToken) {
                 writeTag(tokenType, currentToken);
                 tokenType = currentToken = "";
@@ -307,10 +326,14 @@ public class JackTokenizer {
      */
     private static void writeFile(String fileName) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+        // Just adds standard formatting options
         writer.write("<?xml version = \"1.0\" encoding = \"UTF-8\" standalone = \"no\" ?>\n");
+
+        // Write each character to file
         for(Character character : writeBuffer) {
             writer.write(character);
         }
+        // Don't forget to close
         writer.close();
     }
 
@@ -321,8 +344,7 @@ public class JackTokenizer {
      */
     private static void readFile(String fileName) throws FileNotFoundException {
         BufferedReader reader = new BufferedReader(new FileReader(fileName));
-        reader.lines().forEach(readLine -> {
-            inputFileQueue.add(readLine);
-        });
+        // Lambda method to put lines into buffer
+        reader.lines().forEach(readLine -> { inputFileQueue.add(readLine); });
     }
 }
