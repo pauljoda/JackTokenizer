@@ -1,23 +1,36 @@
 // This file is part of the materials accompanying the book 
 // "The Elements of Computing Systems" by Nisan and Schocken, 
 // MIT Press. Book site: www.idc.ac.il/tecs
-// File name: projects/10/ExpressionlessSquare/Main.jack
+// File name: projects/10/ArrayTest/Main.jack
 
-// Expressionless version of Main.jack.
-
-/**
- * The Main class initializes a new Square Dance game and starts it.
- */
+/** Computes the average of a sequence of integers. */
 class Main {
-
-    // Initializes the square game and starts it.
     function void main() {
-        var SquareGame game;
+        var Array a;
+        var int length;
+	var int i, sum;
 
-        let game = game;
-        do game.run();
-	do game.dispose();
+	let length = Keyboard.readInt("HOW MANY NUMBERS? ");
+	let a = Array.new(length);
+	let i = 0;
 
-        return;
+	while (i < length) {
+	    let a[i] = Keyboard.readInt("ENTER THE NEXT NUMBER: ");
+	    let i = i + 1;
+	}
+
+	let i = 0;
+	let sum = 0;
+
+	while (i < length) {
+	    let sum = sum + a[i];
+	    let i = i + 1;
+	}
+
+	do Output.printString("THE AVERAGE IS: ");
+	do Output.printInt(sum / length);
+	do Output.println();
+
+	return;
     }
 }
